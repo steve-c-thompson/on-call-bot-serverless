@@ -1,0 +1,15 @@
+node_modules/
+.env
+.DS_Store
+/.idea/
+.vscode
+coverage
+/.jest-cache/
+/junit-reports/
+
+# Generated
+/src/generated/
+/dist/
+/temp/
+*.zip
+dump.sql

@@ -1,0 +1,16 @@
+version: "3.1"
+
+services:
+  on_call_bot:
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    # image: on_call_bot:latest
+    ports:
+      - 5000:${PORT:-3000}
+    environment:
+      SLACK_SIGNING_SECRET: ${SLACK_SIGNING_SECRET}
+      SLACK_BOT_TOKEN: ${SLACK_BOT_TOKEN}
+      GOOGLE_SERVICE_ACCOUNT_EMAIL: ${GOOGLE_SERVICE_ACCOUNT_EMAIL}
+      GOOGLE_PRIVATE_KEY: ${GOOGLE_PRIVATE_KEY}
+      SLACK_GOOGLE_SHEET_ID: ${SLACK_GOOGLE_SHEET_ID}

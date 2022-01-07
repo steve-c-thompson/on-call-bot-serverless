@@ -1,0 +1,67 @@
+{
+  "name": "on-call-bot",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "scripts": {
+    "build": "tsc -p .",
+    "build:watch": "tsc -w -p .",
+    "start": "npm run build && node dist/app.js",
+    "test": "jest",
+    "serverless": "npm run build && npx serverless offline --noPrependStageInUrl --allowCache --httpPort=5000"
+  },
+  "jest": {
+    "collectCoverageFrom": [
+      "src/**/*.{ts,tsx}"
+    ],
+    "moduleFileExtensions": [
+      "ts",
+      "js",
+      "tsx",
+      "jsx"
+    ],
+    "transform": {
+      "^.+\\.(ts|tsx)$": "ts-jest"
+    },
+    "testMatch": [
+      "**/?(*.)(spec|test).ts?(x)"
+    ],
+    "testEnvironment": "node",
+    "setupFilesAfterEnv": [
+      "<rootDir>/src/setupTests.ts"
+    ]
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@slack/bolt": "^3.5.0",
+    "@types/aws-lambda": "^8.10.82",
+    "@types/google-spreadsheet": "^3.1.5",
+    "add": "^2.0.6",
+    "dotenv": "^10.0.0",
+    "find-config": "^1.0.0",
+    "google-spreadsheet": "^3.1.15",
+    "moment": "^2.29.1",
+    "node-libcurl": "^2.3.3",
+    "or": "^0.2.0",
+    "prettier": "^2.3.2",
+    "pretty-quick": "^3.1.1",
+    "source-map-support": "^0.5.16",
+    "yarn": "^1.22.11"
+  },
+  "devDependencies": {
+    "@types/jest": "^27.0.1",
+    "@types/node": "^16.6.1",
+    "jest": "^27.0.6",
+    "jest-config": "^27.0.6",
+    "jest-junit": "^12.2.0",
+    "jest-summary-reporter": "^0.0.2",
+    "serverless": "^2.55.0",
+    "serverless-offline": "^8.3.1",
+    "ts-jest": "^27.0.4",
+    "ts-node": "^10.2.0",
+    "ts-node-dev": "^1.1.8",
+    "typescript": "^4.3.5"
+  }
+}
