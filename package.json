@@ -9,7 +9,10 @@
     "start": "npm run build && node dist/app.js",
     "test": "jest",
     "serverless": "npm run build && npx serverless offline --noPrependStageInUrl --allowCache --httpPort=5000",
-    "start-localstack": "./scripts/start-localstack.ts && ./scripts/create-secrets.ts"
+    "start-localstack": "./scripts/start-localstack.ts && ./scripts/create-secrets.ts",
+    "deploy-localstack": "serverless deploy --stage local --verbose",
+    "serverless-localstack" : "npm run start-localstack && npm run serverless",
+    "lambda-localstack" : "npm run start-localstack && npm run deploy-localstack"
   },
   "jest": {
     "collectCoverageFrom": [
@@ -56,16 +59,19 @@
   },
   "devDependencies": {
     "@types/jest": "^27.0.1",
-    "@types/node": "^16.6.1",
+    "@types/node": "^14.18.5",
     "jest": "^27.0.6",
     "jest-config": "^27.0.6",
     "jest-junit": "^12.2.0",
     "jest-summary-reporter": "^0.0.2",
     "serverless": "^2.55.0",
+    "serverless-localstack": "^0.4.35",
     "serverless-offline": "^8.3.1",
     "ts-jest": "^27.0.4",
-    "ts-node": "^10.2.0",
+    "ts-node": "^10.4.0",
     "ts-node-dev": "^1.1.8",
-    "typescript": "^4.3.5"
+    "typescript": "^4.3.5",
+    "webpack": "^4.35.3",
+    "webpack-cli": "^3.3.5"
   }
 }

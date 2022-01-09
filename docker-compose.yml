@@ -5,9 +5,8 @@ services:
     build:
       context: ./
       dockerfile: Dockerfile
-    # image: on_call_bot:latest
-    ports:
-      - 5000:${PORT:-3000}
+#    ports:
+#      - 5000:${PORT:-3000}
     environment:
       SLACK_SIGNING_SECRET: ${SLACK_SIGNING_SECRET}
       SLACK_BOT_TOKEN: ${SLACK_BOT_TOKEN}
@@ -24,14 +23,19 @@ services:
       - "4574:4574"
       - "${PORT_WEB_UI-8080}:${PORT_WEB_UI-8080}"
     environment:
-      - SERVICES=secretsmanager
+      - SERVICES=secretsmanager,cloudformation,sts,s3,lambda,iam,apigateway
       - DEBUG=${DEBUG- }
       - DATA_DIR=${DATA_DIR- }
       - PORT_WEB_UI=${PORT_WEB_UI- }
-      - LAMBDA_EXECUTOR=${LAMBDA_EXECUTOR- }
+      - LAMBDA_EXECUTOR=docker
       - KINESIS_ERROR_PROBABILITY=${KINESIS_ERROR_PROBABILITY- }
       - DOCKER_HOST=unix:///var/run/docker.sock
       - HOST_TMP_FOLDER=${TMPDIR}
+      - SLACK_SIGNING_SECRET=${SLACK_SIGNING_SECRET}
+      - SLACK_BOT_TOKEN=${SLACK_BOT_TOKEN}
+      - GOOGLE_SERVICE_ACCOUNT_EMAIL=${GOOGLE_SERVICE_ACCOUNT_EMAIL}
+      - GOOGLE_PRIVATE_KEY=${GOOGLE_PRIVATE_KEY}
+      - SLACK_GOOGLE_SHEET_ID=${SLACK_GOOGLE_SHEET_ID}
     volumes:
       - "${TMPDIR:-/tmp/localstack}:/tmp/localstack"
       - "/var/run/docker.sock:/var/run/docker.sock"

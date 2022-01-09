@@ -3,9 +3,6 @@ frameworkVersion: '2'
 provider:
   name: aws
   runtime: nodejs14.x
-  environment:
-    SLACK_SIGNING_SECRET: ${env:SLACK_SIGNING_SECRET}
-    SLACK_BOT_TOKEN: ${env:SLACK_BOT_TOKEN}
 functions:
   slack:
     handler: dist/app.handler
@@ -14,5 +11,18 @@ functions:
           path: slack/events
           method: post
 plugins:
-#  - serverless-plugin-typescript
   - serverless-offline
+#  - serverless-localstack
+#  - serverless-plugin-webpack
+package:
+  excludeDevDependencies: false
+custom:
+  localstack:
+    debug: true
+    autostart: true
+    stages:
+      # list of stages for which the plugin should be enabled
+      - dev
+      - local
+  lambda:
+    mountCode: true

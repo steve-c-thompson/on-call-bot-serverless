@@ -13,3 +13,4 @@ coverage
 /temp/
 *.zip
 dump.sql
+.serverless

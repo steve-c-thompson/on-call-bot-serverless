@@ -1,4 +1,4 @@
-import {App as BoltApp, AwsLambdaReceiver, RespondFn} from '@slack/bolt';
+import {App as BoltApp, AwsLambdaReceiver} from '@slack/bolt';
 import {Response} from 'express';
 import {SlackBot} from "./bot/SlackBot";
 import {RespondArguments} from "@slack/bolt/dist/types/utilities";
