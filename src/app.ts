@@ -5,15 +5,19 @@ import {RespondArguments} from "@slack/bolt/dist/types/utilities";
 import {APIGatewayProxyEvent} from "aws-lambda";
 import {GoogleSheetScheduleDataLoader} from "./data/GoogleSheetScheduleDataLoader";
 import {ScheduleData} from "./model/ScheduleData";
+import {EnvSecretDataSource} from "./secrets/EnvSecretDataSource";
 
 require('dotenv').config({ path: require('find-config')('.env') })
 
+const dataSource = new EnvSecretDataSource();
+
 const receiver = new AwsLambdaReceiver({
-    signingSecret: process.env.SLACK_SIGNING_SECRET!,
+    signingSecret: dataSource.signingSecret,
 });
 
 let slackBot : SlackBot;
 let dataLoaderSheet : GoogleSheetScheduleDataLoader;
+
 
 // Handle the Lambda function event
 module.exports.handler = async (event:APIGatewayProxyEvent, context:any, callback:any) => {
@@ -28,7 +32,7 @@ module.exports.handler = async (event:APIGatewayProxyEvent, context:any, callbac
  */
 async function init() {
     if(!slackBot) {
-        const googleSheetId = process.env.SLACK_GOOGLE_SHEET_ID!;
+        const googleSheetId = dataSource.googleSheetId;
         // console.log("SLACK_GOOGLE_SHEET_ID: " + googleSheetId);
         dataLoaderSheet = new GoogleSheetScheduleDataLoader(googleSheetId);
         const scheduleData = await loadSheet(dataLoaderSheet);
@@ -38,8 +42,8 @@ async function init() {
 
 // Initializes your app with your bot token and signing secret
 const boltApp = new BoltApp({
-    token: process.env.SLACK_BOT_TOKEN,
-    signingSecret: process.env.SLACK_SIGNING_SECRET,
+    token: dataSource.slackBotToken,
+    signingSecret: dataSource.signingSecret,
     receiver: receiver,
     // processBeforeResponse: true
 });
@@ -137,7 +141,7 @@ function writeToChannels(message: string, res: Response) {
 
 async function loadSheet(dataLoaderSheet: GoogleSheetScheduleDataLoader) : Promise<ScheduleData> {
     return dataLoaderSheet.init({
-        accountEmail: process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL!,
-        privateKey: process.env.GOOGLE_PRIVATE_KEY!
+        accountEmail: dataSource.googleServiceAccountEmail,
+        privateKey: dataSource.googlePrivateKey!
     });
 }
