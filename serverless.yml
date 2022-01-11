@@ -5,7 +5,9 @@ provider:
   runtime: nodejs14.x
 functions:
   slack:
-    handler: dist/app.handler
+    environment:
+      ${env:}
+    handler: dist/src/app.handler
     events:
       - http:
           path: slack/events

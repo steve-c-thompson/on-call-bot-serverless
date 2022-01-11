@@ -32,8 +32,8 @@ export class GoogleSheetScheduleDataLoader implements ScheduleDataLoader<Schedul
     }
 
     async init (props:GoogleSheetScheduleDataLoaderProps): Promise<ScheduleData> {
-        console.log("Loading google sheet");
-        console.log("Calling testPing");
+        // console.log("Loading google sheet");
+        // console.log("Calling testPing");
         testPing();
         // console.log('####'+props.privateKey);
         const doc = new GoogleSpreadsheet(this.sheetId);

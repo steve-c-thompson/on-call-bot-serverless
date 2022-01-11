@@ -6,9 +6,9 @@
   "scripts": {
     "build": "tsc -p .",
     "build:watch": "tsc -w -p .",
-    "start": "npm run build && node dist/app.js",
+    "start": "npm run build && node dist/src/app.js",
     "test": "jest",
-    "serverless": "npm run build && npx serverless offline --noPrependStageInUrl --allowCache --httpPort=5000",
+    "serverless": "npm run build && NODE_ENV=local npx -c 'serverless offline --noPrependStageInUrl --allowCache --httpPort=5000'",
     "start-localstack": "./scripts/start-localstack.ts && ./scripts/create-secrets.ts",
     "deploy-localstack": "serverless deploy --stage local --verbose",
     "serverless-localstack" : "npm run start-localstack && npm run serverless",
@@ -55,7 +55,9 @@
     "prettier": "^2.3.2",
     "pretty-quick": "^3.1.1",
     "source-map-support": "^0.5.16",
-    "yarn": "^1.22.11"
+    "yarn": "^1.22.11",
+    "env-var": "^7.1.1",
+    "@types/cross-spawn": "^6.0.2"
   },
   "devDependencies": {
     "@types/jest": "^27.0.1",

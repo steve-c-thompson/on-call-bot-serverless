@@ -6,14 +6,75 @@ import {APIGatewayProxyEvent} from "aws-lambda";
 import {GoogleSheetScheduleDataLoader} from "./data/GoogleSheetScheduleDataLoader";
 import {ScheduleData} from "./model/ScheduleData";
 import {EnvSecretDataSource} from "./secrets/EnvSecretDataSource";
+import {AwsSecretsDataSource} from "./secrets/AwsSecretsDataSource";
+import {context} from "./secrets/utils";
 
 require('dotenv').config({ path: require('find-config')('.env') })
 
-const dataSource = new EnvSecretDataSource();
+let boltApp: BoltApp;
+// const dataSource = new EnvSecretDataSource();
+const dataSource = new AwsSecretsDataSource(context.secretsManager);
 
-const receiver = new AwsLambdaReceiver({
-    signingSecret: dataSource.signingSecret,
-});
+// Initialize by executing async function on startup. This is due to promised being returned from the dataSource, and
+// needing to wait for those in ctors.
+(async () => {
+    receiver = new AwsLambdaReceiver({
+        signingSecret:  await dataSource.signingSecret(),
+    });
+    boltApp = new BoltApp({
+        token: await dataSource.slackBotToken(),
+        signingSecret: await dataSource.signingSecret(),
+        receiver: receiver,
+        // processBeforeResponse: true
+    });
+
+    boltApp.command("/oncall", async ({ command, ack, respond }) => {
+        // Acknowledge command request
+        await ack();
+
+        let args = command.text;
+        if(!args) {
+            args = "schedule";
+        }
+        let message;
+        let response_type = "ephemeral";
+        let attachments = [];
+        switch(args) {
+            case "refresh":
+                // do not await this refresh because the response could time out
+                asyncDataRefresh(slackBot, dataLoaderSheet);
+                message = "Schedule refreshed from data";
+                break;
+            case "now":
+                message = await slackBot.handleNowRequest();
+                response_type = "in_channel";
+                break;
+            case "post schedule":
+                response_type = "in_channel";
+            // fall through
+            case "schedule":
+                message = await slackBot.handleScheduleRequest();
+                break;
+            case "help":
+                message = "How to use /oncall"
+                attachments.push({"text": "'/oncall now' to see who is on call right now."
+                        + "\n'/oncall schedule' to see the next few weeks of schedule"
+                        + "\n'/oncall post schedule' to post the next few weeks of schedule"
+                        + "\n'/oncall refresh' to refresh data from the spreadsheet"});
+                break;
+            default:
+                message = "Command not recognized. Use '/oncall help' for more information.";
+        }
+        // cast response_type since it is constrained
+        await respond({
+            response_type: response_type as RespondArguments["response_type"],
+            text: message,
+            attachments: attachments
+        });
+    });
+})()
+
+let receiver: AwsLambdaReceiver;
 
 let slackBot : SlackBot;
 let dataLoaderSheet : GoogleSheetScheduleDataLoader;
@@ -32,66 +93,16 @@ module.exports.handler = async (event:APIGatewayProxyEvent, context:any, callbac
  */
 async function init() {
     if(!slackBot) {
-        const googleSheetId = dataSource.googleSheetId;
-        // console.log("SLACK_GOOGLE_SHEET_ID: " + googleSheetId);
+        const googleSheetId = await dataSource.googleSheetId();
+        console.log("SLACK_GOOGLE_SHEET_ID: " + googleSheetId);
         dataLoaderSheet = new GoogleSheetScheduleDataLoader(googleSheetId);
         const scheduleData = await loadSheet(dataLoaderSheet);
         slackBot = new SlackBot(scheduleData);
     }
 }
 
-// Initializes your app with your bot token and signing secret
-const boltApp = new BoltApp({
-    token: dataSource.slackBotToken,
-    signingSecret: dataSource.signingSecret,
-    receiver: receiver,
-    // processBeforeResponse: true
-});
 
-boltApp.command("/oncall", async ({ command, ack, respond }) => {
-    // Acknowledge command request
-    await ack();
 
-    let args = command.text;
-    if(!args) {
-        args = "schedule";
-    }
-    let message;
-    let response_type = "ephemeral";
-    let attachments = [];
-    switch(args) {
-        case "refresh":
-            // do not await this refresh because the response could time out
-            asyncDataRefresh(slackBot, dataLoaderSheet);
-            message = "Schedule refreshed from data";
-            break;
-        case "now":
-            message = await slackBot.handleNowRequest();
-            response_type = "in_channel";
-            break;
-        case "post schedule":
-            response_type = "in_channel";
-            // fall through
-        case "schedule":
-            message = await slackBot.handleScheduleRequest();
-            break;
-        case "help":
-            message = "How to use /oncall"
-            attachments.push({"text": "'/oncall now' to see who is on call right now."
-                    + "\n'/oncall schedule' to see the next few weeks of schedule"
-                    + "\n'/oncall post schedule' to post the next few weeks of schedule"
-                    + "\n'/oncall refresh' to refresh data from the spreadsheet"});
-            break;
-        default:
-            message = "Command not recognized. Use '/oncall help' for more information.";
-    }
-    // cast response_type since it is constrained
-    await respond({
-        response_type: response_type as RespondArguments["response_type"],
-        text: message,
-        attachments: attachments
-    });
-});
 
 async function asyncDataRefresh(slackBot: SlackBot, dataLoaderSheet: GoogleSheetScheduleDataLoader) {
     const scheduleData = await loadSheet(dataLoaderSheet);
@@ -141,7 +152,7 @@ function writeToChannels(message: string, res: Response) {
 
 async function loadSheet(dataLoaderSheet: GoogleSheetScheduleDataLoader) : Promise<ScheduleData> {
     return dataLoaderSheet.init({
-        accountEmail: dataSource.googleServiceAccountEmail,
-        privateKey: dataSource.googlePrivateKey!
+        accountEmail: await dataSource.googleServiceAccountEmail(),
+        privateKey: await dataSource.googlePrivateKey()
     });
 }

@@ -1,13 +1,13 @@
 #!/usr/bin/env ts-node-script
 
-import { spawnSync } from "child_process";
+import { sync } from "cross-spawn";
 import * as path from "path";
 
 const ROOT_DIR = path.join(__dirname, "..");
 
 /** LocalStack uses bridge mode networking, so the "dockerize" pattern doesn't work */
 export async function startLocalStack() {
-  const { status } = spawnSync("docker-compose", ["up", "-d", "localstack"], {
+  const { status } = sync("docker-compose", ["up", "-d", "localstack"], {
     cwd: ROOT_DIR,
   });
   if (status !== 0) {
@@ -19,7 +19,7 @@ export async function startLocalStack() {
 
 async function waitForLocalStack() {
   while (true) {
-    const { status } = spawnSync("curl", ["http://localhost:4566"]);
+    const { status } = sync("curl", ["http://localhost:4566"]);
     if (status !== 0) {
       console.info("LocalStack is not ready. Waiting 2 seconds...");
       await new Promise((resolve) => setTimeout(resolve, 2000));

@@ -2,22 +2,25 @@
 import {
     CreateSecretCommand,
     ListSecretsCommand,
-    SecretsManagerClient, UpdateSecretCommand
+    SecretsManager, UpdateSecretCommand
 } from "@aws-sdk/client-secrets-manager";
+import {awsInfo} from "../src/secrets/utils";
+import * as AWS from "aws-sdk";
 
 export async function createSecretsFromEnv() {
     console.log("Creating secrets...");
 
-    const secretName = "OncallSlackBot-prod";
-    const secretString = `[{"SLACK_SIGNING_SECRET": "${process.env.SLACK_SIGNING_SECRET}" ,"SLACK_BOT_TOKEN": "${process.env.SLACK_BOT_TOKEN}","GOOGLE_SHEET_ID": "${process.env.SLACK_GOOGLE_SHEET_ID}","GOOGLE_SERVICE_ACCOUNT_EMAIL": "${process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL}","GOOGLE_PRIVATE_KEY": "${process.env.GOOGLE_PRIVATE_KEY}"}]`;
+    const secretName = awsInfo.getSecretName();
+    // create the secret string and stringify the google creds because they will be multiline
+    const secretString = `{"SLACK_SIGNING_SECRET": "${process.env.SLACK_SIGNING_SECRET}" ,"SLACK_BOT_TOKEN": "${process.env.SLACK_BOT_TOKEN}","SLACK_GOOGLE_SHEET_ID": "${process.env.SLACK_GOOGLE_SHEET_ID}","GOOGLE_SERVICE_ACCOUNT_EMAIL": "${process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL}","GOOGLE_PRIVATE_KEY": ${JSON.stringify(process.env.GOOGLE_PRIVATE_KEY)}}`;
 
-    const client = new SecretsManagerClient({
+    const client = new SecretsManager({
         endpoint: "http://localhost:4566",
         credentials: {
-            accessKeyId: "not-a-real-access-key-id",
-            secretAccessKey: "not-a-real-access-key"
+            accessKeyId: AWS.config.credentials?.accessKeyId!,
+            secretAccessKey: AWS.config.credentials?.secretAccessKey!
         },
-        region: "us-west-2",
+        region: AWS.config.region,
     });
 
     // See if secret exists
