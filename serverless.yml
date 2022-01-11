@@ -7,7 +7,7 @@ functions:
   slack:
     environment:
       ${env:}
-    handler: dist/src/app.handler
+    handler: dist/app.handler
     events:
       - http:
           path: slack/events

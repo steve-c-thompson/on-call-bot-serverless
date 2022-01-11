@@ -4,7 +4,7 @@ import {
     ListSecretsCommand,
     SecretsManager, UpdateSecretCommand
 } from "@aws-sdk/client-secrets-manager";
-import {awsInfo} from "../src/secrets/utils";
+import {awsInfo} from "../../secrets/utils";
 import * as AWS from "aws-sdk";
 
 export async function createSecretsFromEnv() {
