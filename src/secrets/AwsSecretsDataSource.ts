@@ -6,7 +6,6 @@ export class AwsSecretsDataSource implements SecretDataSource{
     secretsManager: SecretsManager;
     constructor(sm : SecretsManager) {
         this.secretsManager = sm;
-        console.log("Creating AwsSecretsDataSource");
     }
 
     async buildSecretPromise(secretToken: string) : Promise<string> {

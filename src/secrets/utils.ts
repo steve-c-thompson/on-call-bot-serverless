@@ -3,15 +3,19 @@ import {SecretsManager} from "@aws-sdk/client-secrets-manager";
 
 export type Stage = "dev" | "prod" | "local";
 
+export type SecretName = "OncallSlackBot-serverless-prod" | "OncallSlackBot-serverless-test";
+
 export const context = isLocal() ? createLocalContext() : createContext();
 
 export interface Context {
     secretsManager : SecretsManager;
+    secretName: SecretName;
 }
 
 function createContext(): Context {
     return {
-        secretsManager: new SecretsManager({})
+        secretsManager: new SecretsManager({}),
+        secretName: "OncallSlackBot-serverless-prod"
     };
 }
 
@@ -37,6 +41,7 @@ function createLocalContext(): Context {
             },
             region: AWS.config.region,
         }),
+        secretName: "OncallSlackBot-serverless-test"
     };
 }
 
@@ -50,7 +55,7 @@ class AwsInfo {
     }
 
     getSecretName(): string {
-        return "OncallSlackBot-serverless-prod";
+        return context.secretName;
     }
 }
 
@@ -68,8 +73,10 @@ export async function getSecretValue(sm: SecretsManager, secretName : string) {
                 const parsedSecret = JSON.parse(secret);
                 return parsedSecret;
             }
-
-            return data.SecretBinary!.toString();
+            else {
+                let buff = new Buffer(data.SecretBinary!);
+                return buff.toString('ascii');
+            }
         }
     }
     catch (e) {
