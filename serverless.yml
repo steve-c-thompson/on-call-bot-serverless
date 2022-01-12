@@ -20,7 +20,7 @@ plugins:
   - serverless-webpack
 package:
   excludeDevDependencies: true
-  individually: true
+#  individually: true
 
 custom:
   webpack:

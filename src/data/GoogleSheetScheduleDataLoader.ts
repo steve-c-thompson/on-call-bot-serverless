@@ -5,7 +5,6 @@ import {SlackChannel} from "../model/SlackChannel";
 import {TeamMember} from "../model/TeamMember";
 import {ScheduleBlock} from "../model/ScheduleBlock";
 import moment from "moment";
-import {testPing} from "../utils/httputils";
 
 export type GoogleSheetScheduleDataLoaderProps = {
     sheetId?: string;
@@ -32,10 +31,6 @@ export class GoogleSheetScheduleDataLoader implements ScheduleDataLoader<Schedul
     }
 
     async init (props:GoogleSheetScheduleDataLoaderProps): Promise<ScheduleData> {
-        // console.log("Loading google sheet");
-        // console.log("Calling testPing");
-        testPing();
-        // console.log('####'+props.privateKey);
         const doc = new GoogleSpreadsheet(this.sheetId);
         const sheet = await this.initSheet(doc, props.accountEmail, props.privateKey);
         return await this.buildData(sheet);
