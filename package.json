@@ -8,10 +8,10 @@
     "build:watch": "tsc -w -p .",
     "start": "npm run build && node dist/src/app.js",
     "test": "jest",
-    "serverless": "npm run build && NODE_ENV=local npx -c 'serverless offline --noPrependStageInUrl --allowCache --httpPort=5000'",
+    "serverless": "npm run build && stage=local npx -c 'serverless offline --noPrependStageInUrl --allowCache --httpPort=5000'",
     "start-localstack": "src/test/scripts/start-localstack.ts && src/test/scripts/create-secrets.ts",
     "deploy-localstack": "serverless deploy --stage local --verbose",
-    "serverless-localstack": "npm run build && NODE_ENV=local npm run start-localstack && npm run serverless",
+    "serverless-localstack": "npm run build && stage=local npm run start-localstack && npm run serverless",
     "lambda-localstack": "npm run build && npm run start-localstack && npm run deploy-localstack"
   },
   "jest": {

@@ -27,11 +27,11 @@ function createDevContext(): Context {
 }
 
 function isLocal(): boolean {
-    return process.env.NODE_ENV === "local";
+    return process.env.stage === "local";
 }
 
 function isDev(): boolean {
-    return process.env.NODE_ENV === "dev";
+    return process.env.stage === "dev";
 }
 
 function createLocalContext(): Context {
