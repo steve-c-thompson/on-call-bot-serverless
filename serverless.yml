@@ -3,10 +3,12 @@ frameworkVersion: '2'
 provider:
   name: aws
   runtime: nodejs14.x
+  environment:
+    AWS_NODEJS_CONNECTION_REUSE_ENABLED: 1
+  stage: ${opt:stage, 'dev'}
+  region: ${opt:region, 'us-east-2'}
 functions:
   slack:
-    environment:
-      ${env:}
     handler: dist/app.handler
     events:
       - http:
@@ -15,10 +17,15 @@ functions:
 plugins:
   - serverless-offline
 #  - serverless-localstack
-#  - serverless-plugin-webpack
+  - serverless-webpack
 package:
-  excludeDevDependencies: false
+  excludeDevDependencies: true
+  individually: true
+
 custom:
+  webpack:
+    webpackConfig: ./webpack.config.js
+    includeModules: true
   localstack:
     debug: true
     autostart: true

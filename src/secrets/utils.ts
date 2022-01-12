@@ -5,7 +5,7 @@ export type Stage = "dev" | "prod" | "local";
 
 export type SecretName = "OncallSlackBot-serverless-prod" | "OncallSlackBot-serverless-test";
 
-export const context = isLocal() ? createLocalContext() : createContext();
+export const context = isLocal() ? createLocalContext() : isDev()? createDevContext() : createContext();
 
 export interface Context {
     secretsManager : SecretsManager;
@@ -19,8 +19,19 @@ function createContext(): Context {
     };
 }
 
+function createDevContext(): Context {
+    return {
+        secretsManager: new SecretsManager({}),
+        secretName: "OncallSlackBot-serverless-test"
+    };
+}
+
 function isLocal(): boolean {
     return process.env.NODE_ENV === "local";
+}
+
+function isDev(): boolean {
+    return process.env.NODE_ENV === "dev";
 }
 
 function createLocalContext(): Context {
