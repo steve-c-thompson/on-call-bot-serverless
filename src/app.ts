@@ -30,6 +30,7 @@ const dataSource = new AwsSecretsDataSource(context.secretsManager);
 
     boltApp.command("/oncall", async ({ command, ack, respond }) => {
         // Acknowledge command request
+        console.log("Handling /oncall command " + command.text);
         await ack();
 
         let args = command.text;
@@ -83,6 +84,7 @@ let dataLoaderSheet : GoogleSheetScheduleDataLoader;
 // Handle the Lambda function event
 module.exports.handler = async (event:APIGatewayProxyEvent, context:any, callback:any) => {
     await init();
+    console.log("Starting receiver...");
     const handler = await receiver.start();
     return handler(event, context, callback);
 }

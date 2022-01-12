@@ -5,8 +5,10 @@ provider:
   runtime: nodejs14.x
   environment:
     AWS_NODEJS_CONNECTION_REUSE_ENABLED: 1
+    stage: ${self:provider.stage}
   stage: ${opt:stage, 'dev'}
   region: ${opt:region, 'us-east-2'}
+  memorySize: 512
 functions:
   slack:
     handler: dist/app.handler
@@ -14,10 +16,24 @@ functions:
       - http:
           path: slack/events
           method: post
+    iamRoleStatements:
+      - Effect: "Allow"
+        Action:
+          - "secretsmanager:GetSecretValue"
+        Resource:
+          Fn::Join:
+            - ':'
+            - - 'arn:aws:secretsmanager'
+              - ${self:provider.region}
+              - Ref: 'AWS::AccountId'
+              - 'secret'
+              - 'OncallSlackBot-serverless*'
+              #- 'OncallSlackBot-serverless-test-xjNsV4'
 plugins:
   - serverless-offline
 #  - serverless-localstack
   - serverless-webpack
+  - serverless-iam-roles-per-function
 package:
   excludeDevDependencies: true
 #  individually: true

@@ -13,6 +13,7 @@ export interface Context {
 }
 
 function createContext(): Context {
+    console.log("Creating context for prod");
     return {
         secretsManager: new SecretsManager({}),
         secretName: "OncallSlackBot-serverless-prod"
@@ -20,6 +21,7 @@ function createContext(): Context {
 }
 
 function createDevContext(): Context {
+    console.log("Creating context for dev");
     return {
         secretsManager: new SecretsManager({}),
         secretName: "OncallSlackBot-serverless-test"
@@ -35,6 +37,7 @@ function isDev(): boolean {
 }
 
 function createLocalContext(): Context {
+    console.log("Creating context for local");
     AWS.config.update({
         accessKeyId: "not-a-real-access-key-id",
         secretAccessKey: "not-a-real-access-key",
