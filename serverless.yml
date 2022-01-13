@@ -44,6 +44,8 @@ custom:
   webpack:
     webpackConfig: ./webpack.config.js
     includeModules: true
+    forceExclude:
+      - aws-sdk
   localstack:
     debug: true
     autostart: true

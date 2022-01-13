@@ -1,11 +1,9 @@
-import {App as BoltApp, AwsLambdaReceiver} from '@slack/bolt';
-import {Response} from 'express';
+import {App as BoltApp, AwsLambdaReceiver, LogLevel} from '@slack/bolt';
 import {SlackBot} from "./bot/SlackBot";
 import {RespondArguments} from "@slack/bolt/dist/types/utilities";
 import {APIGatewayProxyEvent} from "aws-lambda";
 import {GoogleSheetScheduleDataLoader} from "./data/GoogleSheetScheduleDataLoader";
 import {ScheduleData} from "./model/ScheduleData";
-import {EnvSecretDataSource} from "./secrets/EnvSecretDataSource";
 import {AwsSecretsDataSource} from "./secrets/AwsSecretsDataSource";
 import {context} from "./secrets/utils";
 
@@ -23,9 +21,9 @@ const dataSource = new AwsSecretsDataSource(context.secretsManager);
     });
     boltApp = new BoltApp({
         token: await dataSource.slackBotToken(),
-        signingSecret: await dataSource.signingSecret(),
         receiver: receiver,
         // processBeforeResponse: true
+        logLevel: LogLevel.DEBUG,
     });
 
     boltApp.command("/oncall", async ({ command, ack, respond }) => {
