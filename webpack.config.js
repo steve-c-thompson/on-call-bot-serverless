@@ -6,7 +6,7 @@ module.exports = (async () => {
     return {
         mode: slsw.lib.webpack.isLocal ? 'development' : 'production',
         entry: slsw.lib.entries,
-        externals: [nodeExternals()],
+        externals: ['aws-sdk', nodeExternals()],
         optimization: {
             nodeEnv: false
         },
@@ -18,9 +18,10 @@ module.exports = (async () => {
             rules: [
                 {
                     test: /\.(tsx?)$/,
-                    loader: 'ts-loader',
+                    use: 'ts-loader',
                     exclude: [
                         [
+                            path.resolve(__dirname, 'node_modules'),
                             path.resolve(__dirname, '.serverless'),
                             path.resolve(__dirname, '.webpack'),
                         ],

@@ -34,11 +34,13 @@ plugins:
 #  - serverless-localstack
   - serverless-webpack
   - serverless-iam-roles-per-function
+  - serverless-plugin-log-retention
 package:
   excludeDevDependencies: true
 #  individually: true
 
 custom:
+  logRetentionInDays: 5
   webpack:
     webpackConfig: ./webpack.config.js
     includeModules: true

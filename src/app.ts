@@ -80,15 +80,6 @@ let receiver: AwsLambdaReceiver;
 let slackBot : SlackBot;
 let dataLoaderSheet : GoogleSheetScheduleDataLoader;
 
-
-// Handle the Lambda function event
-module.exports.handler = async (event:APIGatewayProxyEvent, context:any, callback:any) => {
-    await init();
-    console.log("Starting receiver...");
-    const handler = await receiver.start();
-    return handler(event, context, callback);
-}
-
 /**
  * Init function to load the sheet data and create a new slackBot
  * Runs only if a slackBot has not been created.
@@ -104,44 +95,42 @@ async function init() {
 }
 
 
-
-
 async function asyncDataRefresh(slackBot: SlackBot, dataLoaderSheet: GoogleSheetScheduleDataLoader) {
     const scheduleData = await loadSheet(dataLoaderSheet);
     await slackBot.refresh(scheduleData);
 }
 
-function writeToChannels(message: string, res: Response) {
-    // write to channels - be sure to add the bot to the channels or this will fail
-    const ids = slackBot.getSlackChannelIds();
-    let requests = ids.map(id => {
-        return new Promise((resolve, reject) => {
-            boltApp.client.chat.postMessage({
-                channel: id,
-                text: message
-            }).then(result => {
-                if (result.error) {
-                    reject(result.error);
-                } else {
-                    resolve(result.message);
-                }
-            }).catch(e => {
-                reject(e);
-            });
-
-        });
-    });
-    Promise.all(requests)
-        .then(() => {
-            res.send("Success");
-        })
-        .catch(err => {
-            console.log(err);
-            res.send("Error in call - check the logs");
-            return err;
-        });
-
-}
+// function writeToChannels(message: string, res: Response) {
+//     // write to channels - be sure to add the bot to the channels or this will fail
+//     const ids = slackBot.getSlackChannelIds();
+//     let requests = ids.map(id => {
+//         return new Promise((resolve, reject) => {
+//             boltApp.client.chat.postMessage({
+//                 channel: id,
+//                 text: message
+//             }).then(result => {
+//                 if (result.error) {
+//                     reject(result.error);
+//                 } else {
+//                     resolve(result.message);
+//                 }
+//             }).catch(e => {
+//                 reject(e);
+//             });
+//
+//         });
+//     });
+//     Promise.all(requests)
+//         .then(() => {
+//             res.send("Success");
+//         })
+//         .catch(err => {
+//             console.log(err);
+//             res.send("Error in call - check the logs");
+//             return err;
+//         });
+//
+// }
 // receiver.router.post("/oncall-now", (req, res) => {
 //     // write to channels - be sure to add the bot to the channels or this will fail
 //     slackBot.handleNowRequest().then(msg => {
@@ -157,4 +146,12 @@ async function loadSheet(dataLoaderSheet: GoogleSheetScheduleDataLoader) : Promi
         accountEmail: await dataSource.googleServiceAccountEmail(),
         privateKey: await dataSource.googlePrivateKey()
     });
+}
+
+// Handle the Lambda function event
+module.exports.handler = async (event:APIGatewayProxyEvent, context:any, callback:any) => {
+    await init();
+    console.log("Starting receiver...");
+    const handler = await receiver.start();
+    return handler(event, context, callback);
 }
