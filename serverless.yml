@@ -11,7 +11,7 @@ provider:
   memorySize: 512
 functions:
   slack:
-    handler: dist/app.handler
+    handler: src/app.handler
     events:
       - http:
           path: slack/events
@@ -30,11 +30,10 @@ functions:
               - 'OncallSlackBot-serverless*'
               #- 'OncallSlackBot-serverless-test-xjNsV4'
 plugins:
-  - serverless-offline
-#  - serverless-localstack
   - serverless-webpack
   - serverless-iam-roles-per-function
   - serverless-plugin-log-retention
+  - serverless-offline
 package:
   excludeDevDependencies: true
 #  individually: true

@@ -6,6 +6,8 @@ import {GoogleSheetScheduleDataLoader} from "./data/GoogleSheetScheduleDataLoade
 import {ScheduleData} from "./model/ScheduleData";
 import {AwsSecretsDataSource} from "./secrets/AwsSecretsDataSource";
 import {context} from "./secrets/utils";
+import 'source-map-support/register';
+
 
 require('dotenv').config({ path: require('find-config')('.env') })
 
