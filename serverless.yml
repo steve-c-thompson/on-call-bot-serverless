@@ -1,6 +1,7 @@
 service: on-call-bot-serverless
 frameworkVersion: '2'
 provider:
+  lambdaHashingVersion: "20201221"
   name: aws
   runtime: nodejs14.x
   environment:
@@ -28,7 +29,6 @@ functions:
               - Ref: 'AWS::AccountId'
               - 'secret'
               - 'OncallSlackBot-serverless*'
-              #- 'OncallSlackBot-serverless-test-xjNsV4'
 plugins:
   - serverless-webpack
   - serverless-iam-roles-per-function
@@ -43,14 +43,6 @@ custom:
   webpack:
     webpackConfig: ./webpack.config.js
     includeModules: true
-    forceExclude:
-      - aws-sdk
-  localstack:
-    debug: true
-    autostart: true
-    stages:
-      # list of stages for which the plugin should be enabled
-      - dev
-      - local
-  lambda:
-    mountCode: true
+#      forceExclude:
+#        - aws-sdk
+    excludeFiles: src/**/*.test.js
