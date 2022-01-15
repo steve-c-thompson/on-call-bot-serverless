@@ -5,7 +5,7 @@ export type Stage = "dev" | "prod" | "local";
 
 export type SecretName = "OncallSlackBot-serverless-prod" | "OncallSlackBot-serverless-test";
 
-export const context = isLocal() ? createLocalContext() : createContext();
+export const context = isLocal() ? createLocalContext() : isDev()? createDevContext() : createContext();
 
 export interface Context {
     secretsManager : SecretsManager;
@@ -13,17 +13,31 @@ export interface Context {
 }
 
 function createContext(): Context {
+    console.log("Creating context for prod");
     return {
         secretsManager: new SecretsManager({}),
         secretName: "OncallSlackBot-serverless-prod"
     };
 }
 
+function createDevContext(): Context {
+    console.log("Creating context for dev");
+    return {
+        secretsManager: new SecretsManager({}),
+        secretName: "OncallSlackBot-serverless-test"
+    };
+}
+
 function isLocal(): boolean {
-    return process.env.NODE_ENV === "local";
+    return process.env.stage === "local";
+}
+
+function isDev(): boolean {
+    return process.env.stage === "dev";
 }
 
 function createLocalContext(): Context {
+    console.log("Creating context for local");
     AWS.config.update({
         accessKeyId: "not-a-real-access-key-id",
         secretAccessKey: "not-a-real-access-key",

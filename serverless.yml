@@ -1,30 +1,48 @@
 service: on-call-bot-serverless
 frameworkVersion: '2'
 provider:
+  lambdaHashingVersion: "20201221"
   name: aws
   runtime: nodejs14.x
+  environment:
+    AWS_NODEJS_CONNECTION_REUSE_ENABLED: 1
+    stage: ${self:provider.stage}
+  stage: ${opt:stage, 'dev'}
+  region: ${opt:region, 'us-east-2'}
+  memorySize: 512
 functions:
   slack:
-    environment:
-      ${env:}
-    handler: dist/app.handler
+    handler: src/app.handler
     events:
       - http:
           path: slack/events
           method: post
+    iamRoleStatements:
+      - Effect: "Allow"
+        Action:
+          - "secretsmanager:GetSecretValue"
+        Resource:
+          Fn::Join:
+            - ':'
+            - - 'arn:aws:secretsmanager'
+              - ${self:provider.region}
+              - Ref: 'AWS::AccountId'
+              - 'secret'
+              - 'OncallSlackBot-serverless*'
 plugins:
+  - serverless-webpack
+  - serverless-iam-roles-per-function
+  - serverless-plugin-log-retention
   - serverless-offline
-#  - serverless-localstack
-#  - serverless-plugin-webpack
 package:
-  excludeDevDependencies: false
+  excludeDevDependencies: true
+#  individually: true
+
 custom:
-  localstack:
-    debug: true
-    autostart: true
-    stages:
-      # list of stages for which the plugin should be enabled
-      - dev
-      - local
-  lambda:
-    mountCode: true
+  logRetentionInDays: 5
+  webpack:
+    webpackConfig: ./webpack.config.js
+    includeModules: true
+#      forceExclude:
+#        - aws-sdk
+    excludeFiles: src/**/*.test.js

@@ -3,7 +3,7 @@ This is a Typescript slack bot which allows posting schedule data to a Slack cha
 
 The baseline data source is a Google Spreadsheet. This uses [slack bolt](https://github.com/slackapi/bolt-js/tree/main/examples/getting-started-typescript) and [node google spreadsheet API](https://theoephraim.github.io/node-google-spreadsheet/#/getting-started/authentication).
 
-![Usage](./img/usage.png)
+![Usage](img/usage.png)
 
 ## Setup
 The bot requires several environment variables to run.
@@ -35,7 +35,7 @@ An admin must install the Bot in the Slack workspace in order to use Slack slash
 The baseline data lives in a Google Spreadsheet. The library used to access this sheet treats the first row as column names, so format must be preserved.
 
 ### Schedule
-![Schedule Tab](./img/ScheduleTab.png)
+![Schedule Tab](img/ScheduleTab.png)
 This sheet is the main schedule.
 * `Date Start`
 * `Date End`
@@ -45,19 +45,19 @@ This sheet is the main schedule.
 Names in the _Final Primary_ and _Final Secondary_ columns are primary keys which map to _Team Data_.
 
 ### Team Data
-![Team Data Tab](./img/Team_DataTab.png)
+![Team Data Tab](img/Team_DataTab.png)
 This sheet maps users' first and lastname to Slack Member IDs.
 * `Display Name`
 * `Slack Member ID`
 
 ### Slack Data
-![Slack Data Tab](./img/Slack_DataTab.png)
+![Slack Data Tab](img/Slack_DataTab.png)
 List of Slack workspace channels and IDs, which will be custom to each workspace.
 * `channel`
 * `id`
 
 ### Slack Data
-![Slack Messages Tab](./img/Slack_MessagesTab.png)
+![Slack Messages Tab](img/Slack_MessagesTab.png)
 Flat list of messages to display.
 * `Message`
 
@@ -66,6 +66,6 @@ Substitutions are enabled for the start and end of on-call period.
 * `${period_end}`
 
 ### Flat Data
-![Flat Data Tab](./img/Flat_DataTab.png)
+![Flat Data Tab](img/Flat_DataTab.png)
 This is a simple list of key-value pairs, with cells in the first row (column names) as the keys, and the next row containing all respective data.
 * `resources` - added to messaging when on-call schedule is posted
