@@ -75,6 +75,24 @@ const init = async () => {
     });
 
     slackBot = await initBot();
+
+    const msgRegex = ':arrow_right: *On-call /now* :arrow_left:';
+    app.message(msgRegex,  async ({ message, say }) => {
+        const msg = await slackBot.handleNowRequest();
+
+        try {
+            await say(msg);
+        } catch (e) {
+            console.log("Error messing message", e);
+        }
+    });
+    // Need to call writeToChannel somehow
+    // May need a middleware here
+    // if (event.source === 'serverless-plugin-warmup') {
+    //     console.log('WarmUp - Lambda is warm!');
+    //     return 'Lambda is warm!';
+    // }
+    //app.client.
     return await awsLambdaReceiver.start();
 }
 
