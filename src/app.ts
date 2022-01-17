@@ -86,13 +86,7 @@ const init = async () => {
             console.log("Error messing message", e);
         }
     });
-    // Need to call writeToChannel somehow
-    // May need a middleware here
-    // if (event.source === 'serverless-plugin-warmup') {
-    //     console.log('WarmUp - Lambda is warm!');
-    //     return 'Lambda is warm!';
-    // }
-    //app.client.
+
     return await awsLambdaReceiver.start();
 }
 
@@ -129,6 +123,14 @@ const initPromise = init();
 
 // Handle the Lambda function event
 module.exports.handler = async (event:APIGatewayProxyEvent, context:any, callback:any) => {
+    // The executed promise should take care of extraneous execution, but we may
+    // exit early with serverless-plugin-warmup
+    // if (event.source === 'serverless-plugin-warmup') {
+    //     console.log('WarmUp - Lambda is warm!');
+    //     return 'Lambda is warm!';
+    // }
+    //
+    // Source from a cloudwatch event is aws.events
     const handler = await initPromise;
     return handler(event, context, callback);
 }
