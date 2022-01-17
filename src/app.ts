@@ -76,7 +76,7 @@ const init = async () => {
 
     slackBot = await initBot();
 
-    const msgRegex = ':arrow_right: *On-call /now* :arrow_left:';
+    const msgRegex = /:arrow_right:\s*\*On-call Reminder\*\s*:arrow_left:/;
     app.message(msgRegex,  async ({ message, say }) => {
         const msg = await slackBot.handleNowRequest();
 
