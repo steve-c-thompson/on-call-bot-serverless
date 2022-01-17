@@ -1,7 +1,7 @@
 import {App, AwsLambdaReceiver, LogLevel} from '@slack/bolt';
 import {SlackBot} from "./bot/SlackBot";
 import {RespondArguments} from "@slack/bolt/dist/types/utilities";
-import {APIGatewayProxyEvent} from "aws-lambda";
+import {APIGatewayProxyEvent, EventBridgeEvent} from "aws-lambda";
 import {GoogleSheetScheduleDataLoader} from "./data/GoogleSheetScheduleDataLoader";
 import {ScheduleData} from "./model/ScheduleData";
 import {AwsSecretsDataSource} from "./secrets/AwsSecretsDataSource";
@@ -21,12 +21,12 @@ const init = async () => {
     const slackBotToken = await dataSource.slackBotToken()
     awsLambdaReceiver = new AwsLambdaReceiver({
         signingSecret: signingSecret,
-        logLevel: LogLevel.DEBUG
+        // logLevel: LogLevel.DEBUG
     });
     app = new App({
         token: slackBotToken,
         receiver: awsLambdaReceiver,
-        logLevel: LogLevel.DEBUG,
+        // logLevel: LogLevel.DEBUG,
     });
 
     app.command("/oncall", async ({ command, ack, respond }) => {
@@ -122,15 +122,12 @@ const loadSheet = async (dataLoaderSheet: GoogleSheetScheduleDataLoader) : Promi
 const initPromise = init();
 
 // Handle the Lambda function event
-module.exports.handler = async (event:APIGatewayProxyEvent, context:any, callback:any) => {
-    // The executed promise should take care of extraneous execution, but we may
-    // exit early with serverless-plugin-warmup
-    // if (event.source === 'serverless-plugin-warmup') {
-    //     console.log('WarmUp - Lambda is warm!');
-    //     return 'Lambda is warm!';
-    // }
-    //
-    // Source from a cloudwatch event is aws.events
+module.exports.handler = async (event:APIGatewayProxyEvent & EventBridgeEvent<any, any>, context:any, callback:any) => {
     const handler = await initPromise;
+    // console.log("EVENT RECEIVED " + JSON.stringify(event));
+    if (event.source === 'aws.events') {
+        // console.log('WarmUp - Lambda is warm!');
+        return 'Lambda is warm!';
+    }
     return handler(event, context, callback);
 }
