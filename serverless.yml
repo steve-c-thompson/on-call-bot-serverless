@@ -29,6 +29,7 @@ functions:
               - Ref: 'AWS::AccountId'
               - 'secret'
               - 'OncallSlackBot-serverless*'
+    reservedConcurrency: 1
 plugins:
   - serverless-webpack
   - serverless-iam-roles-per-function
