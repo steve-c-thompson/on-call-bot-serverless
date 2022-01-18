@@ -9,7 +9,7 @@ provider:
     stage: ${self:provider.stage}
   stage: ${opt:stage, 'dev'}
   region: ${opt:region, 'us-east-2'}
-  memorySize: 512
+  memorySize: 256
 functions:
   slack:
     handler: src/app.handler

@@ -1,11 +1,11 @@
 import {App, AwsLambdaReceiver, LogLevel} from '@slack/bolt';
 import {SlackBot} from "./bot/SlackBot";
 import {RespondArguments} from "@slack/bolt/dist/types/utilities";
-import {APIGatewayProxyEvent} from "aws-lambda";
+import {APIGatewayProxyEvent, EventBridgeEvent} from "aws-lambda";
 import {GoogleSheetScheduleDataLoader} from "./data/GoogleSheetScheduleDataLoader";
 import {ScheduleData} from "./model/ScheduleData";
 import {AwsSecretsDataSource} from "./secrets/AwsSecretsDataSource";
-import {context} from "./secrets/utils";
+import {context, logger} from "./secrets/utils";
 
 let app: App;
 const dataSource = new AwsSecretsDataSource(context.secretsManager);
@@ -16,17 +16,17 @@ let slackBot : SlackBot;
 let dataLoaderSheet : GoogleSheetScheduleDataLoader;
 
 const init = async () => {
-    // console.log("Executing async init");
+    logger.debug("Executing async init");
     const signingSecret = await dataSource.signingSecret();
     const slackBotToken = await dataSource.slackBotToken()
     awsLambdaReceiver = new AwsLambdaReceiver({
         signingSecret: signingSecret,
-        logLevel: LogLevel.DEBUG
+        // logLevel: LogLevel.DEBUG
     });
     app = new App({
         token: slackBotToken,
         receiver: awsLambdaReceiver,
-        logLevel: LogLevel.DEBUG,
+        // logLevel: LogLevel.DEBUG,
     });
 
     app.command("/oncall", async ({ command, ack, respond }) => {
@@ -75,6 +75,18 @@ const init = async () => {
     });
 
     slackBot = await initBot();
+
+    const msgRegex = /:arrow_right:\s*\*On-call Reminder\*\s*:arrow_left:/;
+    app.message(msgRegex,  async ({ message, say }) => {
+        const msg = await slackBot.handleNowRequest();
+
+        try {
+            await say(msg);
+        } catch (e) {
+            logger.error("Error messing message", e);
+        }
+    });
+
     return await awsLambdaReceiver.start();
 }
 
@@ -85,7 +97,7 @@ const init = async () => {
 const initBot = async(): Promise<SlackBot> => {
     if(!slackBot) {
         const googleSheetId = await dataSource.googleSheetId();
-        console.log("SLACK_GOOGLE_SHEET_ID: " + googleSheetId);
+        logger.info("SLACK_GOOGLE_SHEET_ID: " + googleSheetId);
         dataLoaderSheet = new GoogleSheetScheduleDataLoader(googleSheetId);
         const scheduleData = await loadSheet(dataLoaderSheet);
         return new SlackBot(scheduleData);
@@ -110,7 +122,12 @@ const loadSheet = async (dataLoaderSheet: GoogleSheetScheduleDataLoader) : Promi
 const initPromise = init();
 
 // Handle the Lambda function event
-module.exports.handler = async (event:APIGatewayProxyEvent, context:any, callback:any) => {
+module.exports.handler = async (event:APIGatewayProxyEvent & EventBridgeEvent<any, any>, context:any, callback:any) => {
     const handler = await initPromise;
+    logger.debug("EVENT RECEIVED " + JSON.stringify(event));
+    if (event.source === 'aws.events') {
+        logger.debug('aws.event received - Lambda is warm');
+        return 'Lambda is warm!';
+    }
     return handler(event, context, callback);
 }
