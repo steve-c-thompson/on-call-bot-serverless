@@ -1,9 +1,18 @@
 import * as AWS from "aws-sdk";
 import {SecretsManager} from "@aws-sdk/client-secrets-manager";
+import winston, {createLogger} from "winston";
 
 export type Stage = "dev" | "prod" | "local";
 
 export type SecretName = "OncallSlackBot-serverless-prod" | "OncallSlackBot-serverless-test";
+
+export const logger = createLogger( {
+    level: 'info',
+    format: winston.format.simple(),
+    transports: [
+        new winston.transports.Console()
+    ]
+});
 
 export const context = isLocal() ? createLocalContext() : isDev()? createDevContext() : createContext();
 
@@ -13,7 +22,7 @@ export interface Context {
 }
 
 function createContext(): Context {
-    console.log("Creating context for prod");
+    logger.info("Creating context for prod");
     return {
         secretsManager: new SecretsManager({}),
         secretName: "OncallSlackBot-serverless-prod"
@@ -21,7 +30,7 @@ function createContext(): Context {
 }
 
 function createDevContext(): Context {
-    console.log("Creating context for dev");
+    logger.info("Creating context for dev");
     return {
         secretsManager: new SecretsManager({}),
         secretName: "OncallSlackBot-serverless-test"
@@ -37,7 +46,7 @@ function isDev(): boolean {
 }
 
 function createLocalContext(): Context {
-    console.log("Creating context for local");
+    logger.info("Creating context for local");
     AWS.config.update({
         accessKeyId: "not-a-real-access-key-id",
         secretAccessKey: "not-a-real-access-key",
@@ -58,22 +67,6 @@ function createLocalContext(): Context {
         secretName: "OncallSlackBot-serverless-test"
     };
 }
-
-class AwsInfo {
-    getAccountNumber(): string {
-        return process.env.CDK_DEFAULT_ACCOUNT || "146543024844";
-    }
-
-    getRegion(): string {
-        return process.env.CDK_DEFAULT_REGION || "us-east-2";
-    }
-
-    getSecretName(): string {
-        return context.secretName;
-    }
-}
-
-export const awsInfo = new AwsInfo();
 
 export async function getSecretValue(sm: SecretsManager, secretName : string) {
     try {

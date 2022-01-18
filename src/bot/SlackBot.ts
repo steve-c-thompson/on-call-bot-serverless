@@ -10,8 +10,7 @@ export class SlackBot {
     private readonly PERIOD_END_TOKEN = "${period_end}";
     private readonly MAX_SCHEDULE_ROWS = 3;
     scheduleData: ScheduleData;
-    constructor(
-        scheduleData: ScheduleData) {
+    constructor(scheduleData: ScheduleData) {
         this.scheduleData = scheduleData;
     }
 

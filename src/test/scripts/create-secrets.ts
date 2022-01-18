@@ -4,11 +4,11 @@ import {
     ListSecretsCommand,
     SecretsManager, UpdateSecretCommand
 } from "@aws-sdk/client-secrets-manager";
-import {awsInfo} from "../../secrets/utils";
 import * as AWS from "aws-sdk";
+import {context} from "../../secrets/utils";
 
 export async function createSecretsFromEnv() {
-    const secretName = awsInfo.getSecretName();
+    const secretName = context.secretName;
 
     // create the secret string and stringify the google creds because they will be multiline
     const secretString = `{"SLACK_SIGNING_SECRET": "${process.env.SLACK_SIGNING_SECRET}" ,"SLACK_BOT_TOKEN": "${process.env.SLACK_BOT_TOKEN}","SLACK_GOOGLE_SHEET_ID": "${process.env.SLACK_GOOGLE_SHEET_ID}","GOOGLE_SERVICE_ACCOUNT_EMAIL": "${process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL}","GOOGLE_PRIVATE_KEY": ${JSON.stringify(process.env.GOOGLE_PRIVATE_KEY)}}`;

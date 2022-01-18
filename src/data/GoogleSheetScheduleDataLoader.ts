@@ -5,6 +5,7 @@ import {SlackChannel} from "../model/SlackChannel";
 import {TeamMember} from "../model/TeamMember";
 import {ScheduleBlock} from "../model/ScheduleBlock";
 import moment from "moment";
+import {logger} from "../secrets/utils";
 
 export type GoogleSheetScheduleDataLoaderProps = {
     sheetId?: string;
@@ -25,7 +26,7 @@ export class GoogleSheetScheduleDataLoader implements ScheduleDataLoader<Schedul
             private_key: privateKey,
         });
         await doc.loadInfo();
-        console.log(doc.title + " loaded");
+        logger.info(doc.title + " loaded");
 
         return doc;
     }

@@ -1,6 +1,6 @@
 import {SecretsManager} from "@aws-sdk/client-secrets-manager";
 import {OncallSecret, SecretDataSource} from "./SecretDataSource";
-import {awsInfo, getSecretValue} from "./utils";
+import {context, getSecretValue, logger} from "./utils";
 
 export class AwsSecretsDataSource implements SecretDataSource{
     secretsManager: SecretsManager;
@@ -10,7 +10,7 @@ export class AwsSecretsDataSource implements SecretDataSource{
 
     async buildSecretPromise(secretToken: string) : Promise<string> {
         return new Promise((resolve, reject) => {
-            let sp = getSecretValue(this.secretsManager, awsInfo.getSecretName());
+            let sp = getSecretValue(this.secretsManager, context.secretName);
             sp.then((sec) => {
                 if(sec) {
                     // Ugly casting to get the secret into correct format
@@ -22,7 +22,7 @@ export class AwsSecretsDataSource implements SecretDataSource{
                     reject(`Secret ${secretToken} not found`);
                 }
             }).catch((reason) => {
-                console.log(`Error fetching ${secretToken}: `, reason);
+                logger.error(`Error fetching ${secretToken}: `, reason);
                 reject(reason);
             });
         });

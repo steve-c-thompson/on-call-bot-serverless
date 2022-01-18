@@ -5,7 +5,7 @@ import {APIGatewayProxyEvent, EventBridgeEvent} from "aws-lambda";
 import {GoogleSheetScheduleDataLoader} from "./data/GoogleSheetScheduleDataLoader";
 import {ScheduleData} from "./model/ScheduleData";
 import {AwsSecretsDataSource} from "./secrets/AwsSecretsDataSource";
-import {context} from "./secrets/utils";
+import {context, logger} from "./secrets/utils";
 
 let app: App;
 const dataSource = new AwsSecretsDataSource(context.secretsManager);
@@ -16,7 +16,7 @@ let slackBot : SlackBot;
 let dataLoaderSheet : GoogleSheetScheduleDataLoader;
 
 const init = async () => {
-    // console.log("Executing async init");
+    logger.debug("Executing async init");
     const signingSecret = await dataSource.signingSecret();
     const slackBotToken = await dataSource.slackBotToken()
     awsLambdaReceiver = new AwsLambdaReceiver({
@@ -83,7 +83,7 @@ const init = async () => {
         try {
             await say(msg);
         } catch (e) {
-            console.log("Error messing message", e);
+            logger.error("Error messing message", e);
         }
     });
 
@@ -97,7 +97,7 @@ const init = async () => {
 const initBot = async(): Promise<SlackBot> => {
     if(!slackBot) {
         const googleSheetId = await dataSource.googleSheetId();
-        console.log("SLACK_GOOGLE_SHEET_ID: " + googleSheetId);
+        logger.info("SLACK_GOOGLE_SHEET_ID: " + googleSheetId);
         dataLoaderSheet = new GoogleSheetScheduleDataLoader(googleSheetId);
         const scheduleData = await loadSheet(dataLoaderSheet);
         return new SlackBot(scheduleData);
@@ -124,9 +124,9 @@ const initPromise = init();
 // Handle the Lambda function event
 module.exports.handler = async (event:APIGatewayProxyEvent & EventBridgeEvent<any, any>, context:any, callback:any) => {
     const handler = await initPromise;
-    // console.log("EVENT RECEIVED " + JSON.stringify(event));
+    logger.debug("EVENT RECEIVED " + JSON.stringify(event));
     if (event.source === 'aws.events') {
-        // console.log('WarmUp - Lambda is warm!');
+        logger.debug('aws.event received - Lambda is warm');
         return 'Lambda is warm!';
     }
     return handler(event, context, callback);
