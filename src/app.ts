@@ -78,12 +78,15 @@ const init = async () => {
 
     const msgRegex = /:arrow_right:\s*\*On-call Reminder\*\s*:arrow_left:/;
     app.message(msgRegex,  async ({ message, say }) => {
-        const msg = await slackBot.handleNowRequest();
+        // @ts-ignore
+        if(message.subtype !== 'reminder_add') {
+            const msg = await slackBot.handleNowRequest();
 
-        try {
-            await say(msg);
-        } catch (e) {
-            logger.error("Error messing message", e);
+            try {
+                await say(msg);
+            } catch (e) {
+                logger.error("Error messing message", e);
+            }
         }
     });
 
