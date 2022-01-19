@@ -10,6 +10,7 @@ provider:
   stage: ${opt:stage, 'dev'}
   region: ${opt:region, 'us-east-2'}
   memorySize: 256
+  logRetentionInDays: 5
 functions:
   slack:
     handler: src/app.handler
@@ -33,14 +34,12 @@ functions:
 plugins:
   - serverless-webpack
   - serverless-iam-roles-per-function
-  - serverless-plugin-log-retention
   - serverless-offline
 package:
   excludeDevDependencies: true
 #  individually: true
 
 custom:
-  logRetentionInDays: 5
   webpack:
     webpackConfig: ./webpack.config.js
     includeModules: true

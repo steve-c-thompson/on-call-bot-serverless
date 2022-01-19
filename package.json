@@ -59,7 +59,6 @@
     "jest-config": "^27.4.7",
     "serverless-iam-roles-per-function": "^3.2.0",
     "serverless-offline": "^8.3.1",
-    "serverless-plugin-log-retention": "^2.0.0",
     "serverless-webpack": "^5.6.0",
     "source-map-loader": "^3.0.1",
     "ts-node": "^10.4.0",
