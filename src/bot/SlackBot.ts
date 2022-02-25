@@ -19,11 +19,15 @@ export class SlackBot {
     }
 
     async handleNowRequest(): Promise<string> {
-        return this.buildNowMessage();
+        return this.buildNowMessage() + this.buildResources();
     }
 
-    async handleScheduleRequest(): Promise<string> {
-        return this.buildScheduleMessage();
+    async handleScheduleRequest(atUsers = false): Promise<string> {
+        return this.buildScheduleMessage(atUsers) + this.buildResources();
+    }
+
+    async handleReminderRequest(atUsers = false): Promise<string> {
+        return this.buildNowMessage() + this.buildScheduleMessage(true) + this.buildResources();
     }
 
     getSlackChannelIds(): string[] {
@@ -32,7 +36,7 @@ export class SlackBot {
 
     private buildResources() {
         let r = this.scheduleData.flatData.get("resources");
-        return r ? "\n" + r + "\n" : "";
+        return r ? r + "\n" : "";
     }
     private buildNowMessage(): string{
         let msg = this.scheduleData.slackMessages[Math.floor(Math.random()*this.scheduleData.slackMessages.length)]
@@ -57,10 +61,10 @@ export class SlackBot {
 
             // @ users
             const userData = this.findUserSlackIds(schedule);
-            let userList = userData.map(x => "<@" + x + ">").join(" ");
+            let userList = userData.map(x => this.formatAtUser(x)).join(" ");
             msg = userList + " " + msg;
         }
-        return msg + this.buildResources();
+        return msg + "\n";
     }
 
     private findUserSlackIds(scheduleBlock:ScheduleBlock): string[]{
@@ -69,8 +73,12 @@ export class SlackBot {
             return m.slackMemberId;
         });
     }
+    private formatAtUser(id: string) {
+        return "<@" + id + ">";
+    }
 
-    private buildScheduleMessage(): string {
+
+    private buildScheduleMessage(atUsers=false): string {
         let msg = "No schedule available at this time";
         const now = moment();
         // find the first startDate "now" is after
@@ -88,15 +96,17 @@ export class SlackBot {
             });
             schedules = schedules.slice(0, schedules.length < this.MAX_SCHEDULE_ROWS ? schedules.length : this.MAX_SCHEDULE_ROWS);
 
-            msg = "Upcoming schedule:\n"
+            msg = "On-Call Schedule:\n"
             schedules.forEach(el => {
                msg += moment(el.dateStart).format(this.OUTPUT_DATE_FORMAT) + " - " + moment(el.dateEnd).format(this.OUTPUT_DATE_FORMAT)
-                    + " " + el.onCallTeamMembers.map(m => { return m.displayName }).join(", ")
+                    + " " + el.onCallTeamMembers.map(m => {
+                        return m.displayName + (atUsers ? " (" + this.formatAtUser(m.slackMemberId) + ")": "");
+                    }).join(", ")
                    + "\n";
 
             });
         }
-        return msg + this.buildResources();
+        return msg;
     }
 
 }

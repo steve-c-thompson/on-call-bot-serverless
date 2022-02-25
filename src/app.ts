@@ -52,16 +52,19 @@ const init = async () => {
                 break;
             case "post schedule":
                 response_type = "in_channel";
-            // fall through
+                message = await slackBot.handleScheduleRequest(true);
+                break;
             case "schedule":
                 message = await slackBot.handleScheduleRequest();
                 break;
             case "help":
                 message = "How to use /oncall"
-                attachments.push({"text": "'/oncall now' to see who is on call right now."
-                        + "\n'/oncall schedule' to see the next few weeks of schedule"
-                        + "\n'/oncall post schedule' to post the next few weeks of schedule"
-                        + "\n'/oncall refresh' to refresh data from the spreadsheet"});
+                attachments.push({"text": "`/oncall now` to see who is on call right now."
+                        + "\n`/oncall schedule` to see the next few weeks of schedule, only visible to you"
+                        + "\n`/oncall post schedule` to post the next few weeks of schedule and @ listed users"
+                        + "\n`/oncall refresh` to refresh data from the spreadsheet"
+                        + "\nThe message `:arrow_right: *On-call Reminder* :arrow_left:` will trigger a schedule `now` + `post schedule`"
+                });
                 break;
             default:
                 message = "Command not recognized. Use '/oncall help' for more information.";
@@ -80,7 +83,7 @@ const init = async () => {
     app.message(msgRegex,  async ({ message, say }) => {
         // @ts-ignore
         if(message.subtype !== 'reminder_add') {
-            const msg = await slackBot.handleNowRequest();
+            const msg = await slackBot.handleReminderRequest(true);
 
             try {
                 await say(msg);
