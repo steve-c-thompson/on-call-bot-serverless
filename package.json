@@ -7,6 +7,7 @@
     "build": "tsc -p .",
     "build:watch": "tsc -w -p .",
     "test": "jest",
+    "ngrok": "~/ngrok http 5000",
     "serverless": "stage=local npx -c 'serverless offline --stage=local --noPrependStageInUrl --allowCache --httpPort=5000'",
     "start-localstack": "src/test/scripts/start-localstack.ts && src/test/scripts/create-secrets.ts",
     "serverless-localstack": "stage=local npm run start-localstack && npm run serverless",
