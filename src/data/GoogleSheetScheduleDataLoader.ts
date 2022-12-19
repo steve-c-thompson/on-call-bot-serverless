@@ -59,15 +59,18 @@ export class GoogleSheetScheduleDataLoader implements ScheduleDataLoader<Schedul
         let scheduleBlocks: ScheduleBlock[] = [];
         await sheet.sheetsByTitle['Schedule'].getRows()
             .then(rows => {
-
                 rows.forEach(row => {
-                    scheduleBlocks.push(new ScheduleBlock(
-                        new Date(row["Date Start"]),
-                        moment(new Date(row["Date End (inclusive)"])).endOf('day').toDate(),
-                        Array.of(
-                            teamMembers.filter(m => m.displayName == row["Final Primary"])[0],
-                            teamMembers.filter(m => m.displayName == row["Final Secondary"])[0]))
-                    );
+                    // ensure row data is valid before adding row
+                    if(row["Date Start"] && row["Date End (inclusive)"] && row["Final Primary"] && row["Final Secondary"]) {
+                        scheduleBlocks.push(new ScheduleBlock(
+                            new Date(row["Date Start"]),
+                            moment(new Date(row["Date End (inclusive)"])).endOf('day').toDate(),
+                            Array.of(
+                                teamMembers.filter(m => m.displayName == row["Final Primary"])[0],
+                                teamMembers.filter(m => m.displayName == row["Final Secondary"])[0]))
+                        );
+                    }
+
                 })
             });
         let messages: string[] = [];
